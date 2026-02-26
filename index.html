@@ -129,7 +129,7 @@
 
             //Sound for the different areas.. 
 
-            //refDistance = Where fading starts
+            // refDistance = Where fading starts
             // maxDistance = Where fading stops changing
             // rolloffFactor = How aggressive the fading is
             // distanceModel = The curve shape
@@ -139,44 +139,44 @@
                 loop: true,
                 autoplay: false,
                 spatialSound: true,
-                volume: 0,
+                volume: 0.7,
                 distanceModel: "exponential",
-                rolloffFactor: 1,
-                maxDistance: 5,
-                refDistance: 1
+                rolloffFactor: 1.5,
+                maxDistance: 800,
+                refDistance: 20
             }));
 
             sounds.push(new BABYLON.Sound("JohnWesley", "audio/toneE4.ogg", scene, soundsReady, {
                 loop: true,
                 autoplay: false,
                 spatialSound: true,
-                volume: 0,
+                volume: 0.7,
                 distanceModel: "exponential",
-                rolloffFactor: 1,
-                maxDistance: 5,
-                refDistance: 1
+                rolloffFactor: 1.5,
+                maxDistance: 800,
+                refDistance: 20
             }));
 
             sounds.push(new BABYLON.Sound("LockedDoor", "audio/toneG2.ogg", scene, soundsReady, {
                 loop: true,
                 autoplay: false,
                 spatialSound: true,
-                volume: 0,
+                volume: .7,
                 distanceModel: "exponential",
-                rolloffFactor: 1,
-                maxDistance: 5,
-                refDistance: 1
+                rolloffFactor: 1.5,
+                maxDistance: 800,
+                refDistance: 20
             }));
 
             sounds.push(new BABYLON.Sound("Chapel", "audio/toneG3.ogg", scene, soundsReady, {
                 loop: true,
                 autoplay: false,
                 spatialSound: true,
-                volume: 0,
+                volume: .7,
                 distanceModel: "exponential",
-                rolloffFactor: 1,
-                maxDistance: 5,
-                refDistance: 1
+                rolloffFactor: 1.5,
+                maxDistance: 800,
+                refDistance: 20
             }));
 
 
@@ -195,10 +195,10 @@
                 }
             }
 
-            getSoundByName("Exit").setPosition(new BABYLON.Vector3(4.06, 0, 1.50));
-            getSoundByName("JohnWesley").setPosition(new BABYLON.Vector3(0.76, 0, 1.50));
-            getSoundByName("LockedDoor").setPosition(new BABYLON.Vector3(-3.60, 0, 1.41));
-            getSoundByName("Chapel").setPosition(new BABYLON.Vector3(-3.60, 0, -0.4));
+            getSoundByName("Exit").setPosition(new BABYLON.Vector3(139.46, -875, 48.06));
+            getSoundByName("JohnWesley").setPosition(new BABYLON.Vector3(26.09, -875, 51.50));
+            getSoundByName("LockedDoor").setPosition(new BABYLON.Vector3(-123.59, -875, 48.41));
+            getSoundByName("Chapel").setPosition(new BABYLON.Vector3(-123.59, -875, -13.73));
 
             // This is a non-spatial sound
             let dogSound = new BABYLON.Sound("Dog", "audio/dog.ogg", scene, soundsReady, {
@@ -207,7 +207,8 @@
                 spatialSound: false,
                 volume: 0,
             });
-            createRandomSoundPlayer([dogSound], 5000, 15000, 0.2, 0.3, 1, 0.6).start();
+
+            // createRandomSoundPlayer([dogSound], 5000, 15000, 0.2, 0.3, 1, 0.6).start();
 
             var light = new BABYLON.DirectionalLight("dir01", new BABYLON.Vector3(0, -1, -0.3), scene);
             let camera;
@@ -231,18 +232,18 @@
             camera.keysRight.push(68); //S
             scene.audioPositioningRefreshRate = 100;
             camera.position = new BABYLON.Vector3(0, 0, 0);
-            camera.speed = .05;
+            camera.speed = 3;
             camera.angularSensibilityX = 20;
             camera.angularSensibilityZ = 2000;
             var mesh;
 
             BABYLON.SceneLoader.ImportMesh("", "./", "scene.gltf", scene, function (newMeshes) {
                 console.log("loaded textures/models");
-                newMeshes[0].scaling = new BABYLON.Vector3(0.6, 0.6, 0.6);
-                newMeshes[0].position.y = -25;
+                newMeshes[0].scaling = new BABYLON.Vector3(20.6, 20.6, 20.6);
+                newMeshes[0].position.y = -858;
                 setTimeout(function () {
                     engine.hideLoadingUI();
-                    sounds.forEach(sound => sound.setVolume(1));
+                    //sounds.forEach(sound => sound.setVolume(1));
                 }, 2000);
             });
 
@@ -253,9 +254,9 @@
             const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 
             scene.registerBeforeRender(function () {
-                scene.activeCamera.position.y = -25.5;
-                camera.position.x = clamp(camera.position.x, -3.6, 4.06);
-                camera.position.z = clamp(camera.position.z, -1.1, 1.5);
+                scene.activeCamera.position.y = -875;
+                camera.position.x = clamp(camera.position.x, -123.6, 139.4);
+                camera.position.z = clamp(camera.position.z, -37.8, 51.5);
                 // var ray = new BABYLON.Ray(camera.position, down, length);
                 // var hit = scene.pickWithRay(ray);
                 // if (hit.pickedMesh) {
