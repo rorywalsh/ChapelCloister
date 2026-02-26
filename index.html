@@ -57,66 +57,157 @@
             });
         };
 
+
+        function createRandomSoundPlayer(soundArray, minIntervalMs, maxIntervalMs, pitchVariation, amplitudeVariation, basePitch, baseAmplitude) {
+            const safeSounds = (soundArray || []).filter(Boolean);
+            const minDelay = Math.max(0, Number(minIntervalMs) || 0);
+            const maxDelay = Math.max(minDelay, Number(maxIntervalMs) || minDelay);
+            const pitchVar = Math.max(0, Number(pitchVariation) || 0);
+            const ampVar = Math.max(0, Number(amplitudeVariation) || 0);
+            const pitchBase = Math.max(0.01, Number(basePitch) || 1);
+            const ampBase = Math.max(0, Number(baseAmplitude) || 1);
+
+            let timerId = null;
+            let isRunning = false;
+
+            const randomRange = (min, max) => min + Math.random() * (max - min);
+            const signedRandom = () => (Math.random() * 2) - 1;
+            const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+
+            function scheduleNext() {
+                if (!isRunning) {
+                    return;
+                }
+
+                const waitMs = randomRange(minDelay, maxDelay);
+                timerId = setTimeout(() => {
+                    if (!isRunning || safeSounds.length === 0) {
+                        return;
+                    }
+
+                    const randomSound = safeSounds[Math.floor(Math.random() * safeSounds.length)];
+                    const randomPitch = Math.max(0.01, pitchBase + (signedRandom() * pitchVar));
+                    const randomAmplitude = clamp(ampBase + (signedRandom() * ampVar), 0, 1);
+
+                    randomSound.setPlaybackRate(randomPitch);
+                    randomSound.setVolume(randomAmplitude);
+                    randomSound.play();
+
+                    scheduleNext();
+                }, waitMs);
+            }
+
+            return {
+                start: function () {
+                    if (isRunning) {
+                        return;
+                    }
+                    isRunning = true;
+                    scheduleNext();
+                },
+                stop: function () {
+                    isRunning = false;
+                    if (timerId !== null) {
+                        clearTimeout(timerId);
+                        timerId = null;
+                    }
+                },
+                isRunning: function () {
+                    return isRunning;
+                }
+            };
+        }
+
         // You have to create a function called createScene. This function must return a BABYLON.Scene object
         // You can reference the following variables: engine, canvas
         // You must at least define a camera
         var createScene = function () {
             var scene = new BABYLON.Scene(engine);
+            scene.useRightHandedSystem = true;
             engine.displayLoadingUI();
             BABYLON.Mesh.checkCollisions = true;
 
             //Sound for the different areas.. 
-            var areaSounds = [];
-            areaSounds.push(new BABYLON.Sound("area1", "audio/file100.wav", scene, soundsReady, {
+
+            //refDistance = Where fading starts
+            // maxDistance = Where fading stops changing
+            // rolloffFactor = How aggressive the fading is
+            // distanceModel = The curve shape
+
+            var sounds = [];
+            sounds.push(new BABYLON.Sound("Exit", "audio/toneC3.ogg", scene, soundsReady, {
                 loop: true,
                 autoplay: false,
                 spatialSound: true,
                 volume: 0,
                 distanceModel: "exponential",
-                rolloffFactor: 1
+                rolloffFactor: 1,
+                maxDistance: 5,
+                refDistance: 1
             }));
 
-            areaSounds.push(new BABYLON.Sound("area1", "audio/file200.wav", scene, soundsReady, {
+            sounds.push(new BABYLON.Sound("JohnWesley", "audio/toneE4.ogg", scene, soundsReady, {
                 loop: true,
                 autoplay: false,
                 spatialSound: true,
                 volume: 0,
                 distanceModel: "exponential",
-                rolloffFactor: 1
+                rolloffFactor: 1,
+                maxDistance: 5,
+                refDistance: 1
             }));
 
-            areaSounds.push(new BABYLON.Sound("area1", "audio/file300.wav", scene, soundsReady, {
+            sounds.push(new BABYLON.Sound("LockedDoor", "audio/toneG2.ogg", scene, soundsReady, {
                 loop: true,
                 autoplay: false,
                 spatialSound: true,
                 volume: 0,
                 distanceModel: "exponential",
-                rolloffFactor: 1
+                rolloffFactor: 1,
+                maxDistance: 5,
+                refDistance: 1
             }));
 
-            areaSounds.push(new BABYLON.Sound("area1", "audio/file400.wav", scene, soundsReady, {
+            sounds.push(new BABYLON.Sound("Chapel", "audio/toneG3.ogg", scene, soundsReady, {
                 loop: true,
                 autoplay: false,
                 spatialSound: true,
                 volume: 0,
                 distanceModel: "exponential",
-                rolloffFactor: 1
+                rolloffFactor: 1,
+                maxDistance: 5,
+                refDistance: 1
             }));
+
 
             var numberOfSoundsReady = 0;
+
+            /* Utility function to get sound by name */
+            function getSoundByName(sname) {
+                return sounds.find(sound => sound.name === sname) || null;
+            }
 
             function soundsReady() {
                 console.log("sounds ready");
                 numberOfSoundsReady++;
-                if (numberOfSoundsReady === areaSounds.length) {
-                    areaSounds.forEach(sound => sound.play());
+                if (numberOfSoundsReady === sounds.length) {
+                    sounds.forEach(sound => sound.play());
                 }
             }
 
-            areaSounds[0].setPosition(new BABYLON.Vector3(2, 0, 7));
-            areaSounds[1].setPosition(new BABYLON.Vector3(-3.6, 0, -9.5));
-            areaSounds[2].setPosition(new BABYLON.Vector3(-14, 0, -7));
-            areaSounds[3].setPosition(new BABYLON.Vector3(1.7, 0, 15));
+            getSoundByName("Exit").setPosition(new BABYLON.Vector3(4.06, 0, 1.50));
+            getSoundByName("JohnWesley").setPosition(new BABYLON.Vector3(0.76, 0, 1.50));
+            getSoundByName("LockedDoor").setPosition(new BABYLON.Vector3(-3.60, 0, 1.41));
+            getSoundByName("Chapel").setPosition(new BABYLON.Vector3(-3.60, 0, -0.4));
+
+            // This is a non-spatial sound
+            let dogSound = new BABYLON.Sound("Dog", "audio/dog.ogg", scene, soundsReady, {
+                loop: false,
+                autoplay: false,
+                spatialSound: false,
+                volume: 0,
+            });
+            createRandomSoundPlayer([dogSound], 5000, 15000, 0.2, 0.3, 1, 0.6).start();
 
             var light = new BABYLON.DirectionalLight("dir01", new BABYLON.Vector3(0, -1, -0.3), scene);
             let camera;
@@ -128,22 +219,12 @@
             camera = scene.activeCamera;
 
             camera.attachControl(canvas, true);
-/*
-            scene.fogMode = BABYLON.Scene.FOGMODE_EXP;
-            scene.fogDensity = 0.1;
-            scene.fogColor = new BABYLON.Color3(0.25, 0.13, 0.09);
-*/
-            var boxCloud = BABYLON.Mesh.CreateSphere("boxCloud", 400, 1500, scene);
+            /*
+                        scene.fogMode = BABYLON.Scene.FOGMODE_EXP;
+                        scene.fogDensity = 0.1;
+                        scene.fogColor = new BABYLON.Color3(0.25, 0.13, 0.09);
+            */
 
-            boxCloud.position = new BABYLON.Vector3(0, 440, 100);
-            var cloudMaterial = new BABYLON.StandardMaterial("cloudMat", scene);
-            var cloudProcText = new BABYLON.CloudProceduralTexture("cloud", 128, scene);
-            cloudMaterial.emissiveTexture = cloudProcText;
-            cloudMaterial.backFaceCulling = false;
-            cloudMaterial.emissiveTexture.coordinatesMode = BABYLON.Texture.FIXED_EQUIRECTANGULAR_MODE;; //BABYLON.Texture.SKYBOX_MODE;
-            boxCloud.material = cloudMaterial;
-            cloudProcText.skyColor = new BABYLON.Color3(0.3, 0.5, 0.9);
-            cloudProcText.cloudColor = new BABYLON.Color3(0.1, 0.1, 0.11);
             camera.keysUp.push(87); //W
             camera.keysDown.push(83) //D
             camera.keysLeft.push(65); //A
@@ -155,13 +236,13 @@
             camera.angularSensibilityZ = 2000;
             var mesh;
 
-            BABYLON.SceneLoader.ImportMesh("", "/", "scene.gltf", scene, function (newMeshes) {
+            BABYLON.SceneLoader.ImportMesh("", "./", "scene.gltf", scene, function (newMeshes) {
                 console.log("loaded textures/models");
                 newMeshes[0].scaling = new BABYLON.Vector3(0.6, 0.6, 0.6);
                 newMeshes[0].position.y = -25;
                 setTimeout(function () {
                     engine.hideLoadingUI();
-                    areaSounds.forEach(sound => sound.setVolume(.6));
+                    sounds.forEach(sound => sound.setVolume(1));
                 }, 2000);
             });
 
@@ -174,7 +255,7 @@
             scene.registerBeforeRender(function () {
                 scene.activeCamera.position.y = -25.5;
                 camera.position.x = clamp(camera.position.x, -3.6, 4.06);
-                camera.position.z = clamp(camera.position.z, -1.5, 1.06);
+                camera.position.z = clamp(camera.position.z, -1.1, 1.5);
                 // var ray = new BABYLON.Ray(camera.position, down, length);
                 // var hit = scene.pickWithRay(ray);
                 // if (hit.pickedMesh) {
