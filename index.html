@@ -201,7 +201,7 @@
             getSoundByName("Chapel").setPosition(new BABYLON.Vector3(-123.59, -875, -13.73));
 
             // This is a non-spatial sound
-            let dogSound = new BABYLON.Sound("Dog", "audio/dog.ogg", scene, soundsReady, {
+            let dogSound = new BABYLON.Sound("Dog", "audio/dog.ogg", scene, null, {
                 loop: false,
                 autoplay: false,
                 spatialSound: false,
